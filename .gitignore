@@ -1,0 +1,6 @@
+# Exclude original html file as it's undeeded
+show1.html
+
+# Exclude example projects
+js/square020.js
+js/triangle015.js
