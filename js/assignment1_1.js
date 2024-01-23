@@ -1,8 +1,9 @@
 /***********
- * triangle015.js
- * A simple triangle with orbit control
- * M. Laszlo
- * September 2019
+ * Project that creates a
+ * cylinder based on triangles
+ * for assignment 1 part 2
+ * Moises Martinez
+ * January 2024
  ***********/
 
 let camera, scene, renderer;
@@ -47,8 +48,8 @@ function createScene() {
 }
 
 // Creates a regular polygon with N sides and rad radius, and has a color that gradually changes from innerColor to outerColor
-// n - number of sides the polygon will be; must be greater than 3, or else will throw an exception
-// rad - radius of the polygon. must be positive, or else will throw an exception
+// n - number of sides the polygon will be
+// rad - radius of the polygon.
 // innerColor - defines the inner color of the polygon; colors are defined in the three.js library
 // outerColor - defines the outer color of the polygon; colors are defined in the three.js library
 function regularPolygonMesh(n, rad, innerColor, outerColor)

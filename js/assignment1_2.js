@@ -1,8 +1,9 @@
 /***********
- * triangle015.js
- * A simple triangle with orbit control
- * M. Laszlo
- * September 2019
+ * Project that creates a
+ * cylinder based on triangles
+ * for assignment 1 part 2
+ * Moises Martinez
+ * January 2024
  ***********/
 
 let camera, scene, renderer;
@@ -14,20 +15,20 @@ function createScene() {
     // DEFINE PARAMETERS HERE
     const myUrl2 = new URL(window.location.toLocaleString());
     // Set polygon size
-    var polygonSideCount = myUrl2.searchParams.get('n');
-    if (polygonSideCount == null) {
+    var polygonSideCount = parseInt(myUrl2.searchParams.get('n'));
+    if (isNaN(polygonSideCount)) {
         // Default to 8 sided polygon
         polygonSideCount = 8;
     }
     // Set polygon radius
-    var polygonRadiusSize = myUrl2.searchParams.get('rad');
-    if (polygonRadiusSize == null) {
+    var polygonRadiusSize = parseFloat(myUrl2.searchParams.get('rad'));
+    if (isNaN(polygonRadiusSize)) {
         // Default to 15 radius
         polygonRadiusSize = 15;
     }
     // Set polygon length
-    var polygonLengthSize = myUrl2.searchParams.get('len');
-    if (polygonLengthSize == null) {
+    var polygonLengthSize = parseFloat(myUrl2.searchParams.get('len'));
+    if (isNaN(polygonLengthSize)) {
         // Default to 20 length
         polygonLengthSize = 15;
     }
@@ -37,7 +38,7 @@ function createScene() {
     scene.add(polygon);
 }
 
-// Creates a regular polygon with N sides and rad radius, and has a color that gradually changes from innerColor to outerColor
+// Creates a regular cylinder with N sides and rad radius and len height
 // n - number of sides the polygon will be
 // rad - radius of the polygon
 // len - height of the cylinder. It will be len tall, with it centered on the origin such that it's center lies on the y-plane and aligns with the y-axis
@@ -47,8 +48,7 @@ function createCylinder(n, rad, len) {
     // Get height for bottom/top based on len value 
     let height = len / 2;
 
-    // Setup array of vertices for use with the cylinder, it will have 2n number of vertices
-    let vertexArray = [];
+
     // The first iteration is for all the verticies in the same y-axis; do all bottom vertices, then all top verticies
     for (let i = 0; i < 2; i++) {
         // Now iterate for each vertex within that y plane to make the n-sided polygon
@@ -60,9 +60,8 @@ function createCylinder(n, rad, len) {
             let zCord = rad * Math.cos(Math.PI * 2 * angle / 360.0);
             // Setup our vertex using the calculated x/z coordinates
             // The y-cord is based on whether this is the top or bottom plane
-            vertexArray.push(new THREE.Vector3(xCord, i == 0 ? height * -1 : height, zCord));
-            // Add them to the array of verticies in the geom object
-            geom.vertices.push(vertexArray[(i*n)+j]);
+            // And add them to the array of verticies in the geom object
+            geom.vertices.push(new THREE.Vector3(xCord, i == 0 ? height * -1 : height, zCord));
         }
     }
 
