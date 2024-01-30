@@ -1,7 +1,8 @@
 /***********
  * Project that creates a
- * cylinder based on triangles
- * for assignment 1 part 2
+ * torus covered with 
+ * starburts on its surface
+ * for assignment 2 part 1
  * Moises Martinez
  * January 2024
  ***********/
@@ -46,21 +47,16 @@ function update() {
     createTorus();
 }
 
-
-function createScene() {
-    // // Create the starburst torus and add it to the root scene
-    // let torus = createTorus();
-    // scene.add(torus);
-}
-
+// Function that creates the actual torus shape, along with all the starbursts
+// Adds the final shape + starbursts to the root scene as well
 function createTorus() {
     // Create the torus object; this is the parent of the starburts, and is located in the center of the root scene
     torus = new THREE.Object3D();
-    // Create 5 starburts that orbit evenly around the center
+    // Create the desired number of starburts that orbit randomly around the center
     for (let i=0; i < controls.nbrBursts; i++) {
         // Get a single random starburst
         let singleCreatedStarburst = starburst();
-        // Get a random spot on the torus and set this starburst to it
+        // Get a random spot on the torus's surface and set this starburst to it
         let randomCord = calculateTorusSpot(getRandomFloat(0, 2*Math.PI), getRandomFloat(0, 2*Math.PI));
         singleCreatedStarburst.position.set(randomCord.x, randomCord.y, randomCord.z);
         // Add this created starburst to the parent scene (the torus)
@@ -70,9 +66,12 @@ function createTorus() {
     scene.add(torus);
 }
 
-// function to calculate a random spot on the torus's surface
-// torusAngle - angle along the circle of the full torus this point will be on
-// tubeAngle - angle of the circle inside the tube
+/**
+ * function to calculate a random spot on the torus's surface
+ * @param {*} torusAngle angle along the circle of the full torus this point will be on
+ * @param {*} tubeAngle angle of the circle inside the tube
+ * @returns the 3d coordinates of the random spot
+ */
 function calculateTorusSpot(torusAngle, tubeAngle) {
     let x = (controls.torusRadius + controls.tubeRadius * Math.cos(tubeAngle)) * Math.cos(torusAngle);
     let y = (controls.torusRadius + controls.tubeRadius * Math.cos(tubeAngle)) * Math.sin(torusAngle);
@@ -80,7 +79,10 @@ function calculateTorusSpot(torusAngle, tubeAngle) {
     return new THREE.Vector3(x, y, z);
 }
 
-// function to make a singular starburst
+/**
+ * function to make a singular starburst
+ * @returns the created starburst
+ */
 function starburst() {
     let origin = new THREE.Vector3(0, 0, 0);
     let innerColor = getRandomColor(0.8, 0.1, 0.8);
