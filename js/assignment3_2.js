@@ -24,7 +24,6 @@ let controls = new function() {
     this.objHeight = 1.0;
     this.colorType = 'Fixed';
     this.color = '#0000ff'; // The professor likes blue, start here
-    this.Go = update;
 }
 
 function initGui() {

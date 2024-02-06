@@ -18,7 +18,6 @@ let controls = new function() {
     this.totalLength = 30.0;
     this.opacity = 0.8;
     this.color = '#d76500'; // I like orange
-    this.Go = update;
 }
 
 function initGui() {
@@ -70,6 +69,8 @@ function createScene() {
     scene.add(ambientLight);
     scene.add(spnskiTetra);
 }
+
+
 /**
  * Creates a Sierpinski tetrahedron by recursively creating smaller tetrahedrons and placing them in corners of bigger ones
  * @param {*} level how many iterations we will recursively call this function
