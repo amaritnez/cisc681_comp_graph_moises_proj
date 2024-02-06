@@ -26,7 +26,7 @@ function initGui() {
     gui.add(controls, 'nbrLevels', 0, 6).step(1).name('Level Count').onChange(update);
     gui.add(controls, 'totalLength', 1.0, 150.0).name('Size').onChange(update);
     gui.add(controls, 'opacity', 0.0, 1.0).name('Opacity').onChange(update);
-    gui.addColor(controls, 'color').onChange(update);;
+    gui.addColor(controls, 'color').onChange(update);
 }
 
 // Function that runs when the user updates the GUI settings
