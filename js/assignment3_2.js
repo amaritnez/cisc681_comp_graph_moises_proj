@@ -89,7 +89,7 @@ function createScene() {
     scene.add(helix);
 }
 
-// Creates the based geometry, based on user setting
+// Creates the original geometry to clone for the helix, based on user setting
 function createBaseGeometry() {
     switch (controls.shape) {
         case 'Sphere':
