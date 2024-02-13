@@ -1,8 +1,9 @@
 /***********
  * Project that creates a
- * pyramid of tori with a cherry
- * on top. Based on ziggurat project
- * Assignment 2 part 2
+ * set of random boxes
+ * within a larger box,
+ * with various user settings
+ * Assignment 4 part 1
  * Moises Martinez
  * January 2024
  ***********/

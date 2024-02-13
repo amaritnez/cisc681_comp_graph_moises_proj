@@ -1,8 +1,10 @@
 /***********
  * Project that creates a
- * pyramid of tori with a cherry
- * on top. Based on ziggurat project
- * Assignment 2 part 2
+ * set of nested tori with a cherry
+ * in the center top. Based on ziggurat project
+ * Also adds various animations for the shapes
+ * to move, and adds some color animations
+ * Assignment 4 part 2
  * Moises Martinez
  * January 2024
  ***********/
@@ -36,8 +38,6 @@ let controls = new function() {
 
 function initGui() {
     let gui = new dat.GUI();
-    // Rotation types array
-    var rotationTypes = ['None', 'Uniform', 'Arithmetic', 'Random'];
     // X-Axis rotation settings
     let f1 = gui.addFolder('X-Axis');
     f1.open();
