@@ -430,7 +430,6 @@ function makeBasicSquare(size, color='red') {
         visible: false,
         depthWrite: false
     }));
-    
     materialArray.push(new THREE.MeshBasicMaterial({
         side: THREE.FrontSide,
         transparent: true,
