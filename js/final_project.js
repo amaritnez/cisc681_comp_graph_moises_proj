@@ -298,19 +298,7 @@ function createScene() {
     // animDirection.push(makeArithRotator(2, 1.0, 2.0,)); //controls.rpsXA, controls.rpsXB));
     // // makeArithRotator(0, controls.rpsXA, controls.rpsXB);
     // moveChildren(bouncingObjectRoot1, ...animDirection);
-    
 
-    
-
-    // //scene.add(ziggurat);
-    // // Setup all animations
-    // let animDirection = [];
-    // animDirection.push(makeArithRotator(0, controls.rpsXA, controls.rpsXB));
-    // // we only do x+y, as z-rotations visually do nothing since the tori are facing the z-axis
-    // animDirection.push(makeArithRotator(1, controls.rpsYA, controls.rpsYB, "rpsy")); 
-    // // Also add a color anim for fun
-    // animDirection.push(makeColorAnimator(controls.colorRate, controls.saturation, controls.lightness));
-    // moveChildren(ziggurat, ...animDirection);
     // Add light stuff
     let light = new THREE.PointLight(0xFFFFFF, 1.0, 1000 );
     light.position.set(0, 0, 40);
@@ -531,27 +519,13 @@ function makeSpin(indx, rps="rps") {
     }
 }
 
-// Function to handle the color animation (have the colors shift across the rainbow)
-function makeColorAnimator(rate, saturation=1.0, lightness=0.5) {
-    function f(child, i, children) {
-        child.crate = rate;
-        child.cval = i / children.length;
-        return function (delta) {
-            this.cval += delta * this.crate;
-            this.cval = mod(this.cval, 1);
-            this.material.color.setHSL(this.cval, saturation, lightness);
-        }
-    }
-    return f;
-}
+
 
 // Function to change the color of the bouncing obj on contact
 function changeColorOnTouch(obj) {
     // recall the bouncing object is made up of multiple faces, so access the face with the texture
     obj.material[4].color = getRandomColor();    
 }
-
-
 
 // Function that handles the actual movement of the bouncing object
 function moveObject(delta) {
@@ -610,6 +584,13 @@ function moveObject(delta) {
         if (otherObj != null) {
             // If this obj right hits the other's left
             if (checkObjectIntersection(this, otherObj) == rightTouch) {
+                // Change the color of the logo (if desired)
+                if (this.changeColorOnTouch == true) {
+                    changeColorOnTouch(this.bouncingSquare);
+                }
+                if (otherObj.changeColorOnTouch == true) {
+                    changeColorOnTouch(otherObj.bouncingSquare);
+                }
                 // Set x movement to the left
                 this.xRate = -1 * Math.abs(this.xRate);
                 // Set x movement of the other obj to the opposite
@@ -617,6 +598,13 @@ function moveObject(delta) {
                 // Set x position such that it doesn't clip in the other object
                 this.position.x = otherObj.position.x - (otherObj.size / 2) - (this.size / 2);
             } else if (checkObjectIntersection(this, otherObj) == leftTouch) { // If this obj left hits the other's right
+                // Change the color of the logo (if desired)
+                if (this.changeColorOnTouch == true) {
+                    changeColorOnTouch(this.bouncingSquare);
+                }
+                if (otherObj.changeColorOnTouch == true) {
+                    changeColorOnTouch(otherObj.bouncingSquare);
+                }
                 // Set x movement to the right
                 this.xRate = Math.abs(this.xRate);
                 // Set x movement of the other obj to the left
@@ -625,6 +613,13 @@ function moveObject(delta) {
                 this.position.x = otherObj.position.x + (otherObj.size / 2) + (this.size / 2);
             }
             if (checkObjectIntersection(this, otherObj) == topTouch) { // If this obj top touches other's bottom
+                // Change the color of the logo (if desired)
+                if (this.changeColorOnTouch == true) {
+                    changeColorOnTouch(this.bouncingSquare);
+                }
+                if (otherObj.changeColorOnTouch == true) {
+                    changeColorOnTouch(otherObj.bouncingSquare);
+                }
                 // Set y movement down
                 this.yRate = -1 * Math.abs(this.yRate);
                 // Set y movement of the other obj to the opposite
@@ -633,6 +628,13 @@ function moveObject(delta) {
                 this.position.y = otherObj.position.y - (otherObj.size / 2) - (this.size / 2);
             }
             else if (checkObjectIntersection(this, otherObj) == bottomTouch) { // If this obj bottom touches other's top
+                // Change the color of the logo (if desired)
+                if (this.changeColorOnTouch == true) {
+                    changeColorOnTouch(this.bouncingSquare);
+                }
+                if (otherObj.changeColorOnTouch == true) {
+                    changeColorOnTouch(otherObj.bouncingSquare);
+                }
                 // Set y movement up
                 this.yRate = Math.abs(this.yRate);
                 // Set y movement of the other obj to the opposite
