@@ -1,10 +1,10 @@
 /***********
- * Project that creates a
- * set of nested tori with a cherry
- * in the center top. Based on ziggurat project
- * Also adds various animations for the shapes
- * to move, and adds some color animations
- * Assignment 4 part 2
+ * Final project that has
+ * various objects bouncing
+ * within a rectangular space
+ * Contains various options
+ * to configure the bouncing
+ * behaviour and functionality
  * Moises Martinez
  * January 2024
  ***********/
@@ -42,23 +42,6 @@ let controls = new function() {
     this.yMove2 = 0.3;
     this.size2 = 17; // Object 2 size
     this.colorChangeOnTouch2 = false; // change color on touch
-    // Torus settings
-    this.nbrTori = 15;
-    this.torusRadius = 150.0;
-    this.tubeRadius = 5.0;
-    // X rotation parameters
-    this.rpsXA = 0.01;
-    this.rpsXB = 0.02;
-    // Y rotation parameters
-    this.rpsYA = 0.01;
-    this.rpsYB = 0.02;
-    // Color rate parameters
-    this.colorRate = 0.5;
-    this.saturation = 1.0;
-    this.lightness = 0.5;
-    this.opacity = 0.8;
-    // Update button
-    this.Update = recreateTori;
 }
 
 function initGui() {
@@ -85,30 +68,6 @@ function initGui() {
     f3.add(controls, 'yMove2', 0, 15.0).name('y speed').onChange(updateObj2);
     f3.add(controls, 'size2', 1, 500).step(1).name('size').onChange(updateObj2);
     f3.add(controls, 'colorChangeOnTouch2').name('change color on touch').onChange(updateObj2);
-
-
-
-    
-    // // Y-Ayis rotation settings
-    // let f2 = gui.addFolder('Y-Ayis');
-    // f2.open();
-    // f2.add(controls, 'rpsYA', -0.25, 0.25).name('rpsA');
-    // f2.add(controls, 'rpsYB', -0.25, 0.25).name('rpsB');
-    // // Color rate update
-    // let f3 = gui.addFolder('Color Rate');
-    // f3.open();
-    // f3.add(controls, 'colorRate', -3.0, 3.0).name('Color Rate');
-    // f3.add(controls, 'saturation', 0.0, 1.0).name('Saturation');
-    // f3.add(controls, 'lightness', 0.0, 1.0).name('Lightness');
-    // f3.add(controls, 'opacity', 0.0, 1.0).name('Opacity');
-    // // Torus settings
-    // let f4 = gui.addFolder('Torus Settings');
-    // f4.open();
-    // f4.add(controls, 'nbrTori', 1, 30).step(1).name('Torus Count');
-    // f4.add(controls, 'torusRadius', 1.0, 350.0).name('First major radius');
-    // f4.add(controls, 'tubeRadius', 1.0, 15.0).step(1).name('Tube radius');
-    // Update button
-    // gui.add(controls, 'Update');
 }
 
 // Updates object 1
@@ -250,15 +209,6 @@ function updateBoundingBoxChanges() {
     // And recreate it
     globalBoundBox = makeGlobalBox(controls.boundOpacity);
     scene.add(globalBoundBox);
-}
-
-// Function to recreate the tori as needed
-function recreateTori() {
-    // If the tori exists
-    if (ziggurat) {
-        // Remove them
-        scene.remove(ziggurat);
-    }
 }
 
 
@@ -472,55 +422,6 @@ function makeBasicSquare(size, color='red') {
 }
 
 
-// Function that sets up the spinning for the tori
-function makeArithRotator(indx, rpsA, rpsB, rps="rps") {
-    let spin = makeSpin(indx, rps);
-    return function(child, i) {
-        child[rps] = rpsA + rpsB * i;
-        return spin;
-    }
-}
-
-// sequencing function so we can run multiple animations at once
-function sequence(...fncs) {
-    return function(data) { fncs.forEach(g => g.call(this, data)) };
-}
-
-// The function that attaches the relavent animations for each element of the nested tori (and cherry!)
-function moveChildren(root, ...fncs) {
-    let children = root.children;
-    children.forEach(function (child, i, children) {
-        let animFncs = fncs.map(g => g(child, i, children));
-        child.update = sequence(...animFncs);
-        subject.register(child);
-    });
-}
-
- 
-/**
- * Individual function to handle rotations in a single axis
- * @param {*} indx which direction to rotate in (0 = x, 1 = y, 2 = z)
- * @param {*} rps variable name of the current object that stores the rotation speed
- * @returns 
- */
-function makeSpin(indx, rps="rps") {
-    return function (delta) {
-        // Get rotation object from the provided shape
-        let vec = this.rotation.toVector3();
-        // Get the specific direction (and its value) within the above rotation to use, as specified by the index
-        let val = vec.getComponent(indx);
-        // update the value using the rps field of the shape
-        val += rpsToRadians(this[rps], delta);
-        val %= 2 * Math.PI;
-        // Update the specific value within the rotation field, specifically the direction that we updated
-        vec.setComponent(indx, val);
-        // And update the rotation object copying the values that we just updated
-        this.rotation.setFromVector3(vec);
-    }
-}
-
-
-
 // Function to change the color of the bouncing obj on contact
 function changeColorOnTouch(obj) {
     // recall the bouncing object is made up of multiple faces, so access the face with the texture
@@ -643,26 +544,6 @@ function moveObject(delta) {
                 this.position.y = otherObj.position.y + (otherObj.size / 2) + (this.size / 2);
             }
         }
-        
-    }
-
-    
-}
-
-// Checks if the provided object is obj 1
-function isBounceObject1(thisObj) {
-    if (thisObj == bouncingObjectRoot1) {
-        return true;
-    }
-    return false;
-}
-
-// Gets the other global bouncing object, based on the provided one
-function getOtherBounceObj(thisObj) {
-    if (thisObj == bouncingObjectRoot1) {
-        return bouncingObjectRoot2
-    } else {
-       return bouncingObjectRoot1;
     }
 }
 
@@ -699,7 +580,7 @@ function checkOutOfBounds(collisionObject, boundingObject) {
  * @param {*} object1 initial object, "moving"
  * @param {*} object2 object to check against, "not moving"
  */
-function checkObjectIntersection(object1, object2) {
+function checkObjectIntersection(object1, object2) {  
     // Divide size by 2 as we are measuring from center to end, not end to end
     let sizeMeas1 = object1.size / 2;
     let sizeMeas2 = object2.size / 2;
@@ -756,6 +637,25 @@ function checkObjectIntersection(object1, object2) {
     return 0;
 }
 
+// Checks if the provided object is obj 1
+function isBounceObject1(thisObj) {
+    if (thisObj == bouncingObjectRoot1) {
+        return true;
+    }
+    return false;
+}
+
+// Gets the other global bouncing object, based on the provided one
+function getOtherBounceObj(thisObj) {
+    if (thisObj == bouncingObjectRoot1) {
+        return bouncingObjectRoot2
+    } else {
+       return bouncingObjectRoot1;
+    }
+}
+
+
+
 function animate() {
 	window.requestAnimationFrame(animate);
 	render();
@@ -809,3 +709,51 @@ createScene();
 initGui();
 render();
 animate();
+
+
+// Function that sets up the spinning for the tori
+function makeArithRotator(indx, rpsA, rpsB, rps="rps") {
+    let spin = makeSpin(indx, rps);
+    return function(child, i) {
+        child[rps] = rpsA + rpsB * i;
+        return spin;
+    }
+}
+
+// sequencing function so we can run multiple animations at once
+function sequence(...fncs) {
+    return function(data) { fncs.forEach(g => g.call(this, data)) };
+}
+
+// The function that attaches the relavent animations for each element of the nested tori (and cherry!)
+function moveChildren(root, ...fncs) {
+    let children = root.children;
+    children.forEach(function (child, i, children) {
+        let animFncs = fncs.map(g => g(child, i, children));
+        child.update = sequence(...animFncs);
+        subject.register(child);
+    });
+}
+
+ 
+/**
+ * Individual function to handle rotations in a single axis
+ * @param {*} indx which direction to rotate in (0 = x, 1 = y, 2 = z)
+ * @param {*} rps variable name of the current object that stores the rotation speed
+ * @returns 
+ */
+function makeSpin(indx, rps="rps") {
+    return function (delta) {
+        // Get rotation object from the provided shape
+        let vec = this.rotation.toVector3();
+        // Get the specific direction (and its value) within the above rotation to use, as specified by the index
+        let val = vec.getComponent(indx);
+        // update the value using the rps field of the shape
+        val += rpsToRadians(this[rps], delta);
+        val %= 2 * Math.PI;
+        // Update the specific value within the rotation field, specifically the direction that we updated
+        vec.setComponent(indx, val);
+        // And update the rotation object copying the values that we just updated
+        this.rotation.setFromVector3(vec);
+    }
+}
