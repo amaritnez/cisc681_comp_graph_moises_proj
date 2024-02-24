@@ -15,11 +15,14 @@ let clock = new THREE.Clock();
 
 let subject = new Subject();
 
+// Global variable to track the out of bounds box
 let globalBoundBox = null;
 
+// Global variable to track each bouncing object
 let bouncingObjectRoot1 = null;
 let bouncingObjectRoot2 = null;
 
+// Constants to track which direction we touched
 const rightTouch = 1;
 const leftTouch = 2;
 const topTouch = 3;
@@ -46,14 +49,13 @@ let controls = new function() {
 
 function initGui() {
     let gui = new dat.GUI();
-    
-    // X-Axis rotation settings
+    // Options for different shape types
     let f1 = gui.addFolder('Bounding Box');
     f1.open();
     f1.add(controls, 'xBounds', 100, 1000).step(1).name('x size').onChange(updateBoundingBoxChanges);
     f1.add(controls, 'yBounds', 100, 1000).step(1).name('y size').onChange(updateBoundingBoxChanges);
     f1.add(controls, 'boundOpacity', 0.0, 1.0).step(0.05).name('bounding opacity').onChange(updateBoundingBoxChanges);    
-    // Y-Ayis rotation settings
+    // Object 1 settings
     let f2 = gui.addFolder('Object 1');
     f2.open();
     f2.add(controls, 'xMove1', 0, 15.0).name('x speed').onChange(updateObj1);
@@ -72,7 +74,6 @@ function initGui() {
 
 // Updates object 1
 function updateObj1() {
-
     // Safety check; size can't be bigger than the bounds of the box, fix that here
     if (controls.size1 > controls.xBounds) {
         controls.size1 = controls.xBounds;
@@ -125,7 +126,6 @@ function updateObj1() {
     bouncingObjectRoot1.position.copy(originalPosition);
     // Set value to change the color on touch here for this obj
     bouncingObjectRoot1.changeColorOnTouch = controls.colorChangeOnTouch1;
-
     // And re add the root to the global scene
     scene.add(bouncingObjectRoot1);
 }
@@ -186,7 +186,6 @@ function updateObj2() {
         bouncingObjectRoot2.position.copy(originalPosition);
         // Set value to change the color on touch here for this obj
         bouncingObjectRoot2.changeColorOnTouch = controls.colorChangeOnTouch2;
-
         // And re add the root to the global scene
         scene.add(bouncingObjectRoot2);
     }
@@ -201,13 +200,12 @@ function updateBoundingBoxChanges() {
     if (controls.size1 + controls.size2 > controls.yBounds) {
         controls.yBounds = controls.size1 + controls.size2 + 1;
     }
-
     // remove the current bounding box
     if (globalBoundBox) {
         scene.remove(globalBoundBox);
     }
     // And recreate it
-    globalBoundBox = makeGlobalBox(controls.boundOpacity);
+    globalBoundBox = makeGlobalBox(controls.boundOpacity, controls.xBounds, controls.yBounds);
     scene.add(globalBoundBox);
 }
 
@@ -216,18 +214,14 @@ function createScene() {
     // Create the scene
     scene = new THREE.Scene();
 
-
     // Create the global bounding box first; this is what'll contain our bouncing shapes
-    globalBoundBox = makeGlobalBox(controls.boundOpacity);
-
+    globalBoundBox = makeGlobalBox(controls.boundOpacity, controls.xBounds, controls.yBounds);
     // Make a root object to countain our bouncing object
     bouncingObjectRoot1 = new THREE.Object3D();
     // Save size and move speed settings to the root, so it can be used to calculate bouncing
     bouncingObjectRoot1.size = controls.size1;
     bouncingObjectRoot1.xRate = controls.xMove1;
     bouncingObjectRoot1.yRate = controls.yMove1;
-
-
     // Basic square obj
     let bouncingSquare = makeBasicSquare(controls.size1);
     // Add the square to the bouncing object root
@@ -239,16 +233,9 @@ function createScene() {
     subject.register(bouncingObjectRoot1);
     // Set value to change the color on touch here for this obj
     bouncingObjectRoot1.changeColorOnTouch = controls.colorChangeOnTouch1;
-
     // Add it to the scene
     scene.add(globalBoundBox);
     scene.add(bouncingObjectRoot1);
-
-    // let animDirection = [];
-    // animDirection.push(makeArithRotator(2, 1.0, 2.0,)); //controls.rpsXA, controls.rpsXB));
-    // // makeArithRotator(0, controls.rpsXA, controls.rpsXB);
-    // moveChildren(bouncingObjectRoot1, ...animDirection);
-
     // Add light stuff
     let light = new THREE.PointLight(0xFFFFFF, 1.0, 1000 );
     light.position.set(0, 0, 40);
@@ -262,13 +249,9 @@ function createScene() {
 }
 
 // Makes the background box
-function makeGlobalBox(opacity) {
-
-    let boxGeom = new THREE.BoxGeometry(controls.xBounds, controls.yBounds, 1);
-
-    // let matArgs = { color: 0xc0c0c0, transparent: true, opacity: opacity, side: THREE.BackSide, depthWrite: false };
-    // let boxMat = new THREE.MeshBasicMaterial(matArgs);
-
+function makeGlobalBox(opacity, xSize, ySize) {
+    // Setup geometry
+    let boxGeom = new THREE.BoxGeometry(xSize, ySize, 1);
     // Setup material for each face, so we only render the walls
     let materialArray = [];
     materialArray.push(new THREE.MeshBasicMaterial({
@@ -309,41 +292,25 @@ function makeGlobalBox(opacity) {
         transparent: true,
         opacity: 0,
     }));
-    
+    // Setup the mesh for the whole box
     let boxMesh = new THREE.Mesh(boxGeom, materialArray);
     boxMesh.position.set(0, 0, -2);
     return boxMesh;
 
 }
 
+// Makes the basic dvd logo square, which is actually a box with 5 sides invisible
 function makeBasicSquare(size, color='red') {
-    // let squareGeom = new THREE.Geometry();
-    // Divide size by two, since it represents width from end to end, not from center to end
-    // size*= 0.5;
-    // // Make 4 points in this order: bottom left, bottom right, top left, top right
-    // squareGeom.vertices.push(new THREE.Vector3(-size, -size, 0));
-    // squareGeom.vertices.push(new THREE.Vector3(size, -size, 0));
-    // squareGeom.vertices.push(new THREE.Vector3(-size, size, 0));
-    // squareGeom.vertices.push(new THREE.Vector3(size, size, 0));
-    // // And make two faces for the square
-    // squareGeom.faces.push(new THREE.Face3(0, 1, 2));
-    // squareGeom.faces.push(new THREE.Face3(1, 2, 3));
-
+    // Setup box geom
     let squareGeom = new THREE.BoxGeometry(size, size, 0);
-
     // Load up texture
-    const textureLoader = new THREE.TextureLoader();//.load("../lib/dvd_logo.png");
+    const textureLoader = new THREE.TextureLoader();
     const texture = textureLoader.load('./lib/dvd_logo.png')
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
+    // We only want 1 dvd logo to appear
     texture.repeat.set(1, 1);
-
-    // const material = new THREE.MeshLambertMaterial({
-    //     map: texture,
-    //     transparent: true,
-    //     opacity: 0.5,
-    // });
-
+    // The front face is the one with the logo
     let frontMaterial = new THREE.MeshBasicMaterial({
         map: texture,
         color: new THREE.Color(color),
@@ -351,7 +318,6 @@ function makeBasicSquare(size, color='red') {
         transparent: true,
         depthWrite: false
     });
-
     // Make an array of materials as we want 5/6 of the faces to be empty
     let materialArray = [];
     materialArray.push(new THREE.MeshBasicMaterial({
@@ -390,35 +356,7 @@ function makeBasicSquare(size, color='red') {
         visible: false,
         depthWrite: false
     }));
-    // let faceMat = new THREE.MeshFaceMaterial(mater)
-    squareMesh = new THREE.Mesh(squareGeom, materialArray);
-
-    // // Setup material + mesh here, be sure to include vertext coloring to get interporlating effect
-    // let mat = new THREE.MeshBasicMaterial({vertexColors: THREE.VertexColors, side: THREE.DoubleSide});
-    // let mesh = new THREE.Mesh(geom, mat);
-
-
-    // let square = new THREE.Shape();
-    // square.moveTo(25, 25);
-    // square.lineTo(25, -25);
-    // square.lineTo(-25, -25);
-    // square.lineTo(-25, 25);
-
-    // let squareGeom = new THREE.ShapeGeometry(square);
-
-    // let material = new THREE.MeshBasicMaterial({
-    //   color: new THREE.Color('red'),
-    //   side: THREE.DoubleSide,
-    //   depthWrite: false
-    // });
-
-    // squareMesh = new THREE.Mesh(squareGeom, material);
-
-    // let boxGeom = new THREE.BoxGeometry(300, 300, 20);
-    // let matArgs = {color: 0xc0c0c0, transparent: true, opacity: 0.3, side: THREE.DoubleSide};
-    // let boxMat = new THREE.MeshLambertMaterial(matArgs);
-    // let boxMesh = new THREE.Mesh(boxGeom, boxMat);
-    return squareMesh;
+    return new THREE.Mesh(squareGeom, materialArray);
 }
 
 
@@ -433,47 +371,39 @@ function moveObject(delta) {
     // Update x and y positions based on the current movement rate (aka velocities)
     this.position.x += this.xRate;
     this.position.y += this.yRate;
+    // Check if we are out of bounds
+    let isOOB = checkOutOfBounds(this, globalBoundBox);
     // We are too far to the right
-    if (checkOutOfBounds(this, globalBoundBox) == 1) {
-        // Change the color of the logo (if desired)
-        if (this.changeColorOnTouch == true) {
-            changeColorOnTouch(this.bouncingSquare);
-        }
+    if (isOOB == 1) {
         // Set x movement to the left
         this.xRate = -1 * Math.abs(this.xRate);
         // Set x position such that it doesn't clip out of the box
         this.position.x = (globalBoundBox.geometry.parameters.width / 2) - (this.size / 2);
-    } else if (checkOutOfBounds(this, globalBoundBox) == 2) { // Too far to the left
-        // Change the color of the logo (if desired)
-        if (this.changeColorOnTouch == true) {
-            changeColorOnTouch(this.bouncingSquare);
-        }
+    } else if (isOOB == 2) { // Too far to the left
         // Set x movement to the right
         this.xRate = Math.abs(this.xRate);
         // Set x position such that it doesn't clip out of the box
         this.position.x = -(globalBoundBox.geometry.parameters.width / 2) + (this.size / 2);
     } 
-    // Check if too far up
-    // We split into two if-elses in rare scenario where x size = x width; in this case, the above code will run, but we still need to update
+    // Check again; we split into two if-elses in rare scenario where x size = x width;
+    // in this case, the above code will run, but we still need to update
     // vertical velocities as well (or else it will fly off into the void)
-    if (checkOutOfBounds(this, globalBoundBox) == 3) { 
-        // Change the color of the logo (if desired)
-        if (this.changeColorOnTouch == true) {
-            changeColorOnTouch(this.bouncingSquare);
-        }
+    isOOB = checkOutOfBounds(this, globalBoundBox);
+    // Check if too far up
+    if (isOOB == 3) { 
         // Set y movement down
         this.yRate = -1 * Math.abs(this.yRate);
         // Set y position such that it doesn't clip out of the box
         this.position.y = (globalBoundBox.geometry.parameters.height / 2) - (this.size / 2);
-    } else if (checkOutOfBounds(this, globalBoundBox) == 4) { // Too far down
-        // Change the color of the logo (if desired)
-        if (this.changeColorOnTouch == true) {
-            changeColorOnTouch(this.bouncingSquare);
-        }
+    } else if (isOOB == 4) { // Too far down
         // Set y movement up
         this.yRate = Math.abs(this.yRate);
         // Set y position such that it doesn't clip out of the box
         this.position.y = -(globalBoundBox.geometry.parameters.height / 2) + (this.size / 2);
+    }
+    // Change the color of the logo (if desired)
+    if (isOOB != 0 && this.changeColorOnTouch == true) {
+        changeColorOnTouch(this.bouncingSquare);
     }
 
     // Now check for collision with the other object //
@@ -483,29 +413,17 @@ function moveObject(delta) {
         let otherObj = getOtherBounceObj(this);
         // Only proceed if other object exist (we have 2 objs)
         if (otherObj != null) {
+            // Track if we end up doing a collision
+            let isCollided = checkObjectIntersection(this, otherObj);
             // If this obj right hits the other's left
-            if (checkObjectIntersection(this, otherObj) == rightTouch) {
-                // Change the color of the logo (if desired)
-                if (this.changeColorOnTouch == true) {
-                    changeColorOnTouch(this.bouncingSquare);
-                }
-                if (otherObj.changeColorOnTouch == true) {
-                    changeColorOnTouch(otherObj.bouncingSquare);
-                }
+            if (isCollided == rightTouch) {
                 // Set x movement to the left
                 this.xRate = -1 * Math.abs(this.xRate);
                 // Set x movement of the other obj to the opposite
                 otherObj.xRate = Math.abs(otherObj.xRate);
                 // Set x position such that it doesn't clip in the other object
                 this.position.x = otherObj.position.x - (otherObj.size / 2) - (this.size / 2);
-            } else if (checkObjectIntersection(this, otherObj) == leftTouch) { // If this obj left hits the other's right
-                // Change the color of the logo (if desired)
-                if (this.changeColorOnTouch == true) {
-                    changeColorOnTouch(this.bouncingSquare);
-                }
-                if (otherObj.changeColorOnTouch == true) {
-                    changeColorOnTouch(otherObj.bouncingSquare);
-                }
+            } else if (isCollided == leftTouch) { // If this obj left hits the other's right
                 // Set x movement to the right
                 this.xRate = Math.abs(this.xRate);
                 // Set x movement of the other obj to the left
@@ -513,14 +431,7 @@ function moveObject(delta) {
                 // Set this x position such that it doesn't clip in the other object
                 this.position.x = otherObj.position.x + (otherObj.size / 2) + (this.size / 2);
             }
-            if (checkObjectIntersection(this, otherObj) == topTouch) { // If this obj top touches other's bottom
-                // Change the color of the logo (if desired)
-                if (this.changeColorOnTouch == true) {
-                    changeColorOnTouch(this.bouncingSquare);
-                }
-                if (otherObj.changeColorOnTouch == true) {
-                    changeColorOnTouch(otherObj.bouncingSquare);
-                }
+            if (isCollided == topTouch) { // If this obj top touches other's bottom
                 // Set y movement down
                 this.yRate = -1 * Math.abs(this.yRate);
                 // Set y movement of the other obj to the opposite
@@ -528,14 +439,7 @@ function moveObject(delta) {
                 // Set y position such that it doesn't clip in the other object
                 this.position.y = otherObj.position.y - (otherObj.size / 2) - (this.size / 2);
             }
-            else if (checkObjectIntersection(this, otherObj) == bottomTouch) { // If this obj bottom touches other's top
-                // Change the color of the logo (if desired)
-                if (this.changeColorOnTouch == true) {
-                    changeColorOnTouch(this.bouncingSquare);
-                }
-                if (otherObj.changeColorOnTouch == true) {
-                    changeColorOnTouch(otherObj.bouncingSquare);
-                }
+            else if (isCollided == bottomTouch) { // If this obj bottom touches other's top
                 // Set y movement up
                 this.yRate = Math.abs(this.yRate);
                 // Set y movement of the other obj to the opposite
@@ -543,11 +447,27 @@ function moveObject(delta) {
                 // Set y position such that it doesn't clip in the other object
                 this.position.y = otherObj.position.y + (otherObj.size / 2) + (this.size / 2);
             }
+            // If a collision happened in any direction, update colors (as necessary)
+            if (isCollided != 0) {
+                // Change the color of the logo (if desired)
+                if (this.changeColorOnTouch == true) {
+                    changeColorOnTouch(this.bouncingSquare);
+                }
+                if (otherObj.changeColorOnTouch == true) {
+                    changeColorOnTouch(otherObj.bouncingSquare);
+                }
+            }
         }
     }
 }
 
-// Checks if the provided shape has gone out of bounds
+// 
+/**
+ * Checks if the provided shape has gone out of bounds
+ * @param {*} collisionObject initial object, the "moving" one
+ * @param {*} boundingObject object to check against aka out of bounds
+ * @return 0 if no intersection; otherwise the value represents which direction it happened
+ */
 function checkOutOfBounds(collisionObject, boundingObject) {
     let xBound = boundingObject.geometry.parameters.width / 2;
     let yBound = boundingObject.geometry.parameters.height / 2;
@@ -579,6 +499,7 @@ function checkOutOfBounds(collisionObject, boundingObject) {
  * Checks if two objects are intersecting each-other
  * @param {*} object1 initial object, "moving"
  * @param {*} object2 object to check against, "not moving"
+ * @return 0 if no intersection; otherwise the value represents which direction it happened
  */
 function checkObjectIntersection(object1, object2) {  
     // Divide size by 2 as we are measuring from center to end, not end to end
@@ -709,51 +630,3 @@ createScene();
 initGui();
 render();
 animate();
-
-
-// Function that sets up the spinning for the tori
-function makeArithRotator(indx, rpsA, rpsB, rps="rps") {
-    let spin = makeSpin(indx, rps);
-    return function(child, i) {
-        child[rps] = rpsA + rpsB * i;
-        return spin;
-    }
-}
-
-// sequencing function so we can run multiple animations at once
-function sequence(...fncs) {
-    return function(data) { fncs.forEach(g => g.call(this, data)) };
-}
-
-// The function that attaches the relavent animations for each element of the nested tori (and cherry!)
-function moveChildren(root, ...fncs) {
-    let children = root.children;
-    children.forEach(function (child, i, children) {
-        let animFncs = fncs.map(g => g(child, i, children));
-        child.update = sequence(...animFncs);
-        subject.register(child);
-    });
-}
-
- 
-/**
- * Individual function to handle rotations in a single axis
- * @param {*} indx which direction to rotate in (0 = x, 1 = y, 2 = z)
- * @param {*} rps variable name of the current object that stores the rotation speed
- * @returns 
- */
-function makeSpin(indx, rps="rps") {
-    return function (delta) {
-        // Get rotation object from the provided shape
-        let vec = this.rotation.toVector3();
-        // Get the specific direction (and its value) within the above rotation to use, as specified by the index
-        let val = vec.getComponent(indx);
-        // update the value using the rps field of the shape
-        val += rpsToRadians(this[rps], delta);
-        val %= 2 * Math.PI;
-        // Update the specific value within the rotation field, specifically the direction that we updated
-        vec.setComponent(indx, val);
-        // And update the rotation object copying the values that we just updated
-        this.rotation.setFromVector3(vec);
-    }
-}
