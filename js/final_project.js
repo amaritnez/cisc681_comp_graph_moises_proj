@@ -194,12 +194,12 @@ function updateObj2() {
 
 // Updates bounding box based on setting changes
 function updateBoundingBoxChanges() {
-    // Safety check; object sizes can't be bigger than the bounds of the box, fix that here
-    if (controls.size1 > controls.xBounds) {
-        controls.xBounds = controls.size1;
+    // Another safety check, the size of both objects cant be bigger than the box as well
+    if (controls.size1 + controls.size2 > controls.xBounds) {
+        controls.xBounds = controls.size1 + controls.size2 + 1;
     }
-    if (controls.size1 > controls.yBounds) {
-        controls.yBounds = controls.size1;
+    if (controls.size1 + controls.size2 > controls.yBounds) {
+        controls.yBounds = controls.size1 + controls.size2 + 1;
     }
 
     // remove the current bounding box
